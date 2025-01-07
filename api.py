@@ -16,7 +16,14 @@ load_dotenv()
 # API Keys and Config
 API_KEY = os.getenv("API_KEY")
 ASSEMBLYAI_API_KEY = os.getenv("ASSEMBLYAI_API_KEY")
-ALLOWED_ORIGINS = os.getenv("ALLOWED_ORIGINS", "http://localhost:3000").split(",")
+ALLOWED_ORIGINS = [
+    "http://localhost:3000",
+    "http://localhost:8080",
+    "http://localhost:5173",  # Vite default port
+    "http://127.0.0.1:8080",
+    "http://127.0.0.1:3000",
+    "http://127.0.0.1:5173",
+]
 
 # Setup AssemblyAI
 aai.settings.api_key = ASSEMBLYAI_API_KEY
@@ -38,13 +45,14 @@ async def get_api_key(api_key_header: str = Security(api_key_header)):
         status_code=HTTP_403_FORBIDDEN, detail="Could not validate API key"
     )
 
-# Add CORS middleware
+# Add CORS middleware with more permissive settings
 app.add_middleware(
     CORSMiddleware,
     allow_origins=ALLOWED_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+    expose_headers=["*"]
 )
 
 class TranscriptionRequest(BaseModel):

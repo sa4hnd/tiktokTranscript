@@ -2,106 +2,176 @@
 
 This API service allows you to transcribe TikTok videos to text using AssemblyAI.
 
-## Setup
+## Quick Start for React Vite
 
-1. Clone the repository
-2. Install dependencies:
-```bash
-pip install -r requirements.txt
+1. **Set Up Environment Variables**
+   Create `.env` file in your Vite project root:
+   ```env
+   # The API endpoint (required)
+   VITE_API_URL=https://tiktoktranscript.fly.dev
+
+   # Your API key (required)
+   VITE_API_KEY=FjJjcJ7a9V3DtkyjnTIv9VvaU_yz5f41hntC3lkvv20
+   ```
+
+2. **Install Axios**
+   ```bash
+   npm install axios
+   ```
+
+3. **Make API Calls**
+   ```javascript
+   const response = await axios.post(
+     `${import.meta.env.VITE_API_URL}/transcribe`,
+     {
+       tiktok_url: "YOUR_TIKTOK_URL"
+     },
+     {
+       headers: {
+         'X-API-Key': import.meta.env.VITE_API_KEY,
+         'Content-Type': 'application/json'
+       }
+     }
+   );
+   ```
+
+## API Details
+
+### Base URL
 ```
-3. Set up environment variables:
-   - Copy `.env.example` to `.env`
-   - Add your AssemblyAI API key (get it from [AssemblyAI](https://www.assemblyai.com/))
-   - Set your API key for authentication
-   - Configure allowed origins
-
-## API Endpoint
-
-### Transcribe TikTok Video
-
-**Endpoint:** `POST /transcribe`
-
-**Headers:**
-```
-X-API-Key: your-api-key
-Content-Type: application/json
-```
-
-**Request Body:**
-```json
-{
-    "tiktok_url": "https://www.tiktok.com/@username/video/1234567890",
-    "save_transcript": true  // optional, defaults to false
-}
-```
-
-**Response:**
-```json
-{
-    "title": "video_title",
-    "transcription": "transcribed_text",
-    "file_path": "path_to_saved_file"  // only if save_transcript is true
-}
+https://tiktoktranscript.fly.dev
 ```
 
-**Error Responses:**
-- `400`: Invalid URL or video not accessible
-- `403`: Invalid API key
-- `500`: Server error or transcription failed
+### Authentication
+- API Key: `FjJjcJ7a9V3DtkyjnTIv9VvaU_yz5f41hntC3lkvv20`
+- Add to headers as `X-API-Key`
 
-## Running the API
+### Endpoints
 
-1. Start the server:
-```bash
-python api.py
-```
-2. API will be available at `http://localhost:8000`
-3. Access API documentation at `http://localhost:8000/docs`
+1. **Health Check**
+   - `GET /`
+   - No authentication required
+   - Response: `{ "status": "ok", "message": "API is running" }`
 
-## React Integration
+2. **Transcribe Video**
+   - `POST /transcribe`
+   - Headers Required:
+     ```json
+     {
+       "X-API-Key": "FjJjcJ7a9V3DtkyjnTIv9VvaU_yz5f41hntC3lkvv20",
+       "Content-Type": "application/json"
+     }
+     ```
+   - Request Body:
+     ```json
+     {
+       "tiktok_url": "https://www.tiktok.com/@username/video/1234567890"
+     }
+     ```
+   - Success Response (200):
+     ```json
+     {
+       "title": "video_title",
+       "transcription": "transcribed_text"
+     }
+     ```
+   - Error Responses:
+     - `400`: Invalid URL or video not accessible
+     - `403`: Invalid API key
+     - `500`: Server error or transcription failed
 
-1. Copy `.env.example` to `.env` in your React project
-2. Set your environment variables:
-```
-REACT_APP_API_URL=http://localhost:8000
-REACT_APP_API_KEY=your-api-key
-```
-3. Import and use the TranscriptionComponent:
+## Example Component
+
 ```jsx
-import TranscriptionComponent from './components/TranscriptionComponent';
+import { useState } from 'react';
+import axios from 'axios';
 
-function App() {
+const TranscriptionComponent = () => {
+  const [url, setUrl] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [result, setResult] = useState(null);
+  const [error, setError] = useState(null);
+
+  const handleTranscribe = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      const response = await axios.post(
+        `${import.meta.env.VITE_API_URL}/transcribe`,
+        {
+          tiktok_url: url
+        },
+        {
+          headers: {
+            'X-API-Key': import.meta.env.VITE_API_KEY,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+
+      setResult(response.data);
+    } catch (err) {
+      setError(err.response?.data?.detail || 'An error occurred');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div>
-      <TranscriptionComponent />
+      <input
+        type="text"
+        value={url}
+        onChange={(e) => setUrl(e.target.value)}
+        placeholder="Enter TikTok URL"
+      />
+      <button onClick={handleTranscribe} disabled={loading}>
+        {loading ? 'Transcribing...' : 'Transcribe'}
+      </button>
+      {error && <div style={{color: 'red'}}>{error}</div>}
+      {result && (
+        <div>
+          <h3>Title: {result.title}</h3>
+          <p>{result.transcription}</p>
+        </div>
+      )}
     </div>
   );
-}
+};
+
+export default TranscriptionComponent;
 ```
 
-## Example cURL Request
+## Important Notes
 
-```bash
-curl -X POST http://localhost:8000/transcribe \
-  -H "X-API-Key: your-api-key" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "tiktok_url": "https://www.tiktok.com/@username/video/1234567890",
-    "save_transcript": true
-  }'
-```
+1. **Environment Variables**
+   - Must start with `VITE_` to be exposed to client code
+   - Required variables:
+     ```env
+     VITE_API_URL=https://tiktoktranscript.fly.dev
+     VITE_API_KEY=FjJjcJ7a9V3DtkyjnTIv9VvaU_yz5f41hntC3lkvv20
+     ```
 
-## Files Structure
+2. **URL Format**
+   - Must be a valid TikTok URL
+   - Format: `https://www.tiktok.com/@username/video/1234567890`
 
-```
-├── api.py              # Main API server
-├── .env               # Environment variables
-├── requirements.txt   # Python dependencies
-└── example-react-usage.jsx  # React component example
-```
+3. **Rate Limiting**
+   - Consider implementing rate limiting in your frontend
+   - API has a timeout of 30 seconds for transcription
 
-## Notes
-
-- The API requires a valid TikTok video URL
-- Transcripts are saved in the `transcripts` directory when `save_transcript` is true
-- Temporary files are automatically cleaned up after transcription
+4. **Error Handling**
+   ```javascript
+   try {
+     const response = await axios.post(...);
+   } catch (error) {
+     if (error.response?.status === 403) {
+       // Handle invalid API key
+     } else if (error.response?.status === 400) {
+       // Handle invalid URL
+     } else {
+       // Handle other errors
+     }
+   }
+   ```
