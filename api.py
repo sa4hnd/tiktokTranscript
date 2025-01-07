@@ -23,6 +23,11 @@ aai.settings.api_key = ASSEMBLYAI_API_KEY
 
 app = FastAPI(title="TikTok Transcription API")
 
+# Add health check endpoint
+@app.get("/")
+async def health_check():
+    return {"status": "ok", "message": "API is running"}
+
 # Security
 api_key_header = APIKeyHeader(name="X-API-Key")
 

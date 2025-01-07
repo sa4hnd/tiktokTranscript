@@ -5,14 +5,16 @@ from dotenv import load_dotenv
 # Load environment variables
 load_dotenv()
 
-# The URL of your API endpoint
-api_url = "http://localhost:8000/transcribe"
+# The URL of your API endpoint (use environment variable or default to localhost)
+api_url = os.getenv("API_URL", "http://localhost:8000") + "/transcribe"
 
 # Get API key from environment
 api_key = os.getenv("API_KEY")
 
+print(f"\nUsing API at: {api_url}")
+
 # The TikTok video URL you want to transcribe (replace with your TikTok URL)
-tiktok_url = input("Enter TikTok URL: ")
+tiktok_url = input("\nEnter TikTok URL: ")
 
 # Request payload
 payload = {
