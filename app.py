@@ -1,17 +1,17 @@
 import tkinter as tk
 from tkinter import ttk
 import yt_dlp
-import openai
 import tempfile
 import os
 import re
 import customtkinter
+import assemblyai as aai
 
-# API KEY
-openai.api_key = 'sk-XXXX'
+# API KEY - Replace with your AssemblyAI API key
+aai.settings.api_key = "05c0fb0e1d514963af89304d10bf483b"
 
-customtkinter.set_appearance_mode("dark")  # Modes: "System" (standard), "Dark", "Light"
-customtkinter.set_default_color_theme("blue")  # Themes: "blue" (standard), "green", "dark-blue"
+customtkinter.set_appearance_mode("dark")
+customtkinter.set_default_color_theme("blue")
 
 class TikTokDownloaderApp(customtkinter.CTk):
     def __init__(self):
@@ -81,18 +81,16 @@ class TikTokDownloaderApp(customtkinter.CTk):
                 ydl.download([tiktok_url])
 
             mp3_file_path = os.path.join(work_dir, f'{sanitized_video_title}.mp3')
-            with open(mp3_file_path, 'rb') as mp3_file:
-                mp3_data = mp3_file.read()
 
-            temp_audio_file = tempfile.NamedTemporaryFile(delete=False, suffix=".mp3", dir=work_dir)
-            temp_audio_file.write(mp3_data)
-            temp_audio_file.close()
+            # Create a transcriber
+            transcriber = aai.Transcriber()
 
-            audio_file = open(temp_audio_file.name, "rb")
-            transcript = openai.Audio.transcribe("whisper-1", audio_file)
-            audio_file.close()
+            # Transcribe the audio file
+            transcript = transcriber.transcribe(mp3_file_path)
 
+            # Get the transcription text
             transcription = transcript.text
+
             transcript_file_path = os.path.join(transcripts_dir, f'{sanitized_video_title}.txt')
 
             with open(transcript_file_path, 'w', encoding='utf-8') as txt_file:
@@ -103,7 +101,6 @@ class TikTokDownloaderApp(customtkinter.CTk):
 
             print(f"Transcription saved as {transcript_file_path}")
             os.remove(mp3_file_path)
-            os.remove(temp_audio_file.name)
             print(f"The temporary files for {sanitized_video_title} have been deleted")
 
 if __name__ == "__main__":

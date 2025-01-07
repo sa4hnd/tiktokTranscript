@@ -10,7 +10,7 @@ if %errorlevel% neq 0 (
 )
 
 :: Step 2: Install required Python packages
-pip install yt-dlp openai requests
+pip install -r requirements.txt
 
 :: Step 3: Exit the batch script
 exit /b 0
