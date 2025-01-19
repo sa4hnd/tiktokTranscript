@@ -25,7 +25,10 @@ ALLOWED_ORIGINS = [
     "http://127.0.0.1:3000",
     "http://127.0.0.1:5173",
     "http://127.0.0.1:8081",  # Added new localhost port
-    "https://nodeflowai.com",  # Added production domain
+    "https://nodeflowai.com",  # Production domain
+    "http://nodeflowai.com",   # HTTP version
+    "https://www.nodeflowai.com",  # With www
+    "http://www.nodeflowai.com",   # HTTP with www
 ]
 
 # Setup AssemblyAI
